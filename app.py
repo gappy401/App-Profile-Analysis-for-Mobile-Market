@@ -37,6 +37,10 @@ tab1, tab2, tab3 = st.tabs(["📈 Overview", "🏆 Top Apps", "📝 App Explorer
 with tab1:
     st.subheader("📊 Genre Distribution")
     genre_counts = df['predicted_genre'].value_counts().reset_index()
+    alt.Chart(genre_counts).mark_bar().encode(
+    x='index',
+    y='predicted_genre',
+    color='index')
     genre_chart = alt.Chart(genre_counts).mark_bar().encode(
         x='index',
         y='predicted_genre',
