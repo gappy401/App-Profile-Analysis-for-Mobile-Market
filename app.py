@@ -1,39 +1,79 @@
 import streamlit as st
 import pandas as pd
+import altair as alt
 
-# Load cleaned Apple App Store data
+# Load cleaned data
 df = pd.read_csv('data/apple_cleaned.csv')
 
+# Page config
 st.set_page_config(page_title="Apple App Store Insights", layout="wide")
-st.title("📱 Apple App Store Insights Dashboard")
+
+# Title and intro
+st.markdown("<h1 style='color:#ff4b4b;'>📱 Apple App Store Insights</h1>", unsafe_allow_html=True)
+st.markdown("Explore genre trends, ratings, and top-performing apps using metadata and machine learning.")
+
+# KPIs
+col1, col2, col3 = st.columns(3)
+col1.metric("Total Apps", len(df))
+col2.metric("Average Rating", round(df['rating_value'].mean(), 2))
+col3.metric("Most Common Genre", df['predicted_genre'].mode()[0])
 
 # Sidebar filters
-genre = st.sidebar.selectbox("Filter by Genre", ["All"] + sorted(df['predicted_genre'].unique()))
+st.sidebar.header("🔍 Filter Apps")
+selected_genres = st.sidebar.multiselect("Select Genres", df['predicted_genre'].unique(), default=df['predicted_genre'].unique())
 min_rating = st.sidebar.slider("Minimum Rating", 0.0, 5.0, 3.0)
+search_term = st.sidebar.text_input("Search App Title")
 
 # Apply filters
-filtered_df = df.copy()
-if genre != "All":
-    filtered_df = filtered_df[filtered_df['predicted_genre'] == genre]
+filtered_df = df[df['predicted_genre'].isin(selected_genres)]
 filtered_df = filtered_df[filtered_df['rating_value'] >= min_rating]
+if search_term:
+    filtered_df = filtered_df[filtered_df['title'].str.contains(search_term, case=False)]
 
-# Genre distribution
-st.subheader("📊 Genre Distribution")
-st.bar_chart(df['predicted_genre'].value_counts())
+# Tabs
+tab1, tab2, tab3 = st.tabs(["📈 Overview", "🏆 Top Apps", "📝 App Explorer"])
 
-# Ratings by genre
-st.subheader("⭐ Average Rating by Genre")
-avg_ratings = df.groupby('predicted_genre')['rating_value'].mean().sort_values(ascending=False)
-st.bar_chart(avg_ratings)
+# Tab 1: Overview
+with tab1:
+    st.subheader("📊 Genre Distribution")
+    genre_counts = df['predicted_genre'].value_counts().reset_index()
+    genre_chart = alt.Chart(genre_counts).mark_bar().encode(
+        x='index',
+        y='predicted_genre',
+        color='index'
+    ).properties(width=600)
+    st.altair_chart(genre_chart)
 
-# Top apps
-st.subheader("🏆 Top Rated Apps")
-top_apps = filtered_df.sort_values(by='rating_value', ascending=False).head(10)
-st.dataframe(top_apps[['title', 'rating_value', 'reviews_count', 'predicted_genre', 'developer']])
+    st.subheader("⭐ Average Rating by Genre")
+    avg_ratings = df.groupby('predicted_genre')['rating_value'].mean().reset_index()
+    rating_chart = alt.Chart(avg_ratings).mark_bar().encode(
+        x='predicted_genre',
+        y='rating_value',
+        color='predicted_genre'
+    ).properties(width=600)
+    st.altair_chart(rating_chart)
 
-# Description viewer
-st.subheader("📝 App Descriptions")
-for _, row in top_apps.iterrows():
-    st.markdown(f"**{row['title']}** — *{row['developer']}*")
-    st.write(row['description'])
-    
+# Tab 2: Top Apps
+with tab2:
+    st.subheader("🏆 Top Rated Apps")
+    top_apps = filtered_df.sort_values(by='rating_value', ascending=False).head(10)
+    for _, row in top_apps.iterrows():
+        st.markdown(f"""
+        <div style='border:1px solid #ddd; padding:10px; margin:10px; border-radius:8px'>
+            <h4>{row['title']}</h4>
+            <p><strong>Rating:</strong> {row['rating_value']} ⭐</p>
+            <p><strong>Genre:</strong> {row['predicted_genre']}</p>
+            <p><strong>Developer:</strong> {row['developer']}</p>
+            <a href="{row['url']}" target="_blank">🔗 View on App Store</a>
+        </div>
+        """, unsafe_allow_html=True)
+
+# Tab 3: App Explorer
+with tab3:
+    st.subheader("🔎 Explore Filtered Apps")
+    st.dataframe(filtered_df[['title', 'rating_value', 'reviews_count', 'predicted_genre', 'developer']])
+    st.download_button("📥 Download Filtered Data", filtered_df.to_csv(index=False), "filtered_apps.csv")
+
+# Footer
+st.markdown("---")
+st.markdown("Made with ❤️ by Nandita Ghildyal | Powered by Streamlit & ML")
