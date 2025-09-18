@@ -78,4 +78,4 @@ with tab3:
 
 # Footer
 st.markdown("---")
-st.markdown("Made with ❤️ by Nandita Ghildyal | Powered by Streamlit & ML")
+st.markdown("Made by Nandita Ghildyal | Powered by Streamlit & ML")
