@@ -37,25 +37,23 @@ tab1, tab2, tab3 = st.tabs(["📈 Overview", "🏆 Top Apps", "📝 App Explorer
 with tab1:
     st.subheader("📊 Genre Distribution")
     genre_counts = df['predicted_genre'].value_counts().reset_index()
-    alt.Chart(genre_counts).mark_bar().encode(
-    x='index',
-    y='predicted_genre',
-    color='index')
+    genre_counts.columns = ['genre', 'count']
     genre_chart = alt.Chart(genre_counts).mark_bar().encode(
-        x='index',
-        y='predicted_genre',
-        color='index'
-    ).properties(width=600)
-    st.altair_chart(genre_chart)
+        x=alt.X('genre:N', title='Genre'),
+        y=alt.Y('count:Q', title='Number of Apps'),
+        color='genre:N'
+    ).properties(width=600, height=400, title='Genre Distribution')
+    st.altair_chart(genre_chart, use_container_width=True)
 
     st.subheader("⭐ Average Rating by Genre")
     avg_ratings = df.groupby('predicted_genre')['rating_value'].mean().reset_index()
+    avg_ratings.columns = ['genre', 'avg_rating']
     rating_chart = alt.Chart(avg_ratings).mark_bar().encode(
-        x='predicted_genre',
-        y='rating_value',
-        color='predicted_genre'
-    ).properties(width=600)
-    st.altair_chart(rating_chart)
+        x=alt.X('genre:N', title='Genre'),
+        y=alt.Y('avg_rating:Q', title='Average Rating'),
+        color='genre:N'
+    ).properties(width=600, height=400, title='Average Rating by Genre')
+    st.altair_chart(rating_chart, use_container_width=True)
 
 # Tab 2: Top Apps
 with tab2:
@@ -68,7 +66,7 @@ with tab2:
             <p><strong>Rating:</strong> {row['rating_value']} ⭐</p>
             <p><strong>Genre:</strong> {row['predicted_genre']}</p>
             <p><strong>Developer:</strong> {row['developer']}</p>
-            <a href="{row['url']}" target="_blank">🔗 View on App Store</a>
+            <a href="{row.get('url', '#')}" target="_blank">🔗 View on App Store</a>
         </div>
         """, unsafe_allow_html=True)
 
