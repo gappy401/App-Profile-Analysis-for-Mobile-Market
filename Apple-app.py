@@ -180,25 +180,22 @@ def render_explorer_tab():
     
     st.markdown(f"### 📱 {app_data['trackName']}")
 
+
     # First Row: Core App Info
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        st.metric("Rating", f"{app_data['averageUserRating']}")
-    with col2:
-        st.metric("Reviews", f"{app_data['userRatingCount']}")
-    with col3:
-        st.metric("Price", f"{app_data['formattedPrice']}")
-    with col4:
-        st.metric("Genre", genre)
+    col_rating, col_reviews, col_price, col_genre = st.columns([1, 1, 1, 1])
+    col_rating.metric(label="Rating", value=f"{app_data['averageUserRating']}")
+    col_reviews.metric(label="Reviews", value=f"{app_data['userRatingCount']}")
+    col_price.metric(label="Price", value=f"{app_data['formattedPrice']}")
+    col_genre.metric(label="Genre", value=genre)
+
+    # Spacer for visual breathing room
+    st.markdown("")
 
     # Second Row: Advisory + Comparative Metrics
-    col5, col6, col7 = st.columns(3)
-    with col5:
-        st.metric("Advisory", app_data['contentAdvisoryRating'])
-    with col6:
-        st.metric("Rating Percentile", f"{rating_percentile}%")
-    with col7:
-        st.metric("Review Z-Score", f"{z_score_reviews:.2f}")
+    col_advisory, col_percentile, col_zscore = st.columns([1, 1, 1])
+    col_advisory.metric(label="Advisory", value=app_data['contentAdvisoryRating'])
+    col_percentile.metric(label="Rating Percentile", value=f"{rating_percentile}%")
+    col_zscore.metric(label="Review Z-Score", value=f"{z_score_reviews:.2f}")
 
     # ------------------ Charts ------------------
     chart1, chart2 = st.columns(2)
