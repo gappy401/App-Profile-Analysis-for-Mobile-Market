@@ -50,13 +50,4 @@ This tool enables teams to:
 - Altair and Seaborn for statistical visualizations
 - Scikit-learn for keyword extraction via NLP
 
-## Author
 
-Nandita Ghildyal  
-Applied Data Scientist & Machine Learning Engineer  
-Syracuse University  
-Portfolio: [Insert link]
-
-## License
-
-This project is released under the MIT License.
