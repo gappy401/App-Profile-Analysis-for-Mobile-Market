@@ -180,16 +180,22 @@ def render_explorer_tab():
             genre_monetization['userRatingCount'].std()
         ) if genre_monetization['userRatingCount'].std() > 0 else 0
 
-        # Top Row
+        # Top Row Title
         st.markdown(f"### 📱 {app_data['trackName']}")
-        col1, col2, col3, col4, col5, col6, col7 = st.columns(7)
-        col1.metric("⭐ Rating", f"{app_data['averageUserRating']}")
-        col2.metric("📝 Reviews", f"{app_data['userRatingCount']}")
-        col3.metric("💰 Price", f"{app_data['formattedPrice']}")
-        col4.metric("🎯 Genre", genre)
-        col5.metric("⚠️ Advisory", app_data['contentAdvisoryRating'])
-        col6.metric("📈 Rating Percentile", f"{rating_percentile}%")
-        col7.metric("📊 Review Z-Score", f"{z_score_reviews:.2f}")
+
+        # First Row: Core App Info
+        row1_col1, row1_col2, row1_col3, row1_col4 = st.columns(4)
+        row1_col1.metric("Rating", f"{app_data['averageUserRating']}")
+        row1_col2.metric("Reviews", f"{app_data['userRatingCount']}")
+        row1_col3.metric("Price", f"{app_data['formattedPrice']}")
+        row1_col4.metric("Genre", genre)
+
+        # Second Row: Advisory + Comparative Metrics
+        row2_col1, row2_col2, row2_col3 = st.columns(3)
+        row2_col1.metric("Advisory", app_data['contentAdvisoryRating'])
+        row2_col2.metric("Rating Percentile", f"{rating_percentile}%")
+        row2_col3.metric("Review Z-Score", f"{z_score_reviews:.2f}")
+
 
         # Chart Grid
         grid1, grid2 = st.columns(2)
@@ -204,14 +210,21 @@ def render_explorer_tab():
             st.pyplot(fig1)
 
         with grid2:
-            st.markdown("#### 💸 Price vs. Rating in Genre")
-            fig2, ax2 = plt.subplots(figsize=(5, 3))
-            sns.boxplot(data=genre_monetization, x='formattedPrice', y='averageUserRating', ax=ax2)
+            # Convert price to numeric
+            genre_monetization['price_numeric'] = pd.to_numeric(genre_monetization['price'], errors='coerce')
+
+            # Bin into price ranges
+            genre_monetization['price_bin'] = pd.cut(
+                genre_monetization['price_numeric'],
+                bins=[0, 0.99, 4.99, 9.99, 19.99, 99.99],
+                labels=["Free", "<$1", "$1–5", "$5–10", "$10+"]
+)
+            sfig2, ax2 = plt.subplots(figsize=(6, 4))
+            sns.boxplot(data=genre_monetization, x='price_bin', y='averageUserRating', ax=ax2)
             ax2.set_title(f"Price vs. Rating — {genre}", fontsize=12)
-            ax2.set_xlabel("Price Category", fontsize=10)
+            ax2.set_xlabel("Price Range", fontsize=10)
             ax2.set_ylabel("Average User Rating", fontsize=10)
             ax2.grid(True, linestyle='--', alpha=0.4)
-            ax2.tick_params(axis='x', labelrotation=45)
             st.pyplot(fig2)
 
         # Update Timeline
