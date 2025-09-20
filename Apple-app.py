@@ -97,7 +97,27 @@ with tab2:
 
 # ------------------ TAB 3: EXPLORER ------------------
 with tab3:
-    # App selection from filtered_explorer (still from top_df)
+    st.subheader("🔍 Explore Filtered Apps")
+
+    # Filters
+    min_rating_exp = st.slider("Minimum Rating", 0.0, 5.0, 3.0, key="exp_rating")
+    price_filter_exp = st.selectbox("Price Type", ["All", "Free", "Paid"], key="exp_price")
+    search_term_exp = st.text_input("Search Title", key="exp_search")
+
+    filtered_explorer = top_df[top_df['averageUserRating'] >= min_rating_exp]
+    if price_filter_exp == "Free":
+        filtered_explorer = filtered_explorer[filtered_explorer['formattedPrice'] == 'Free']
+    elif price_filter_exp == "Paid":
+        filtered_explorer = filtered_explorer[filtered_explorer['formattedPrice'] != 'Free']
+    if search_term_exp:
+        filtered_explorer = filtered_explorer[filtered_explorer['trackName'].str.contains(search_term_exp, case=False)]
+
+    # Display clean table
+    display_cols = ['trackName', 'averageUserRating', 'userRatingCount', 'formattedPrice', 'contentAdvisoryRating']
+    valid_cols = [col for col in display_cols if col in filtered_explorer.columns]
+    st.dataframe(filtered_explorer[valid_cols], use_container_width=True, hide_index=True)
+
+    # App selection
     selected_app = st.selectbox("📌 Select an App to Explore", filtered_explorer['trackName'].unique())
     app_data = filtered_explorer[filtered_explorer['trackName'] == selected_app].iloc[0]
 
@@ -115,10 +135,8 @@ with tab3:
     **Advisory:** {app_data.get('contentAdvisoryRating', 'N/A')}
     """)
 
-    # Genre comparison using overview_df
-    genre_peers = overview_df[overview_df['primaryGenreName'] == genre]
-
     # 📊 Rating Distribution in Genre
+    genre_peers = overview_df[overview_df['primaryGenreName'] == genre]
     fig1, ax1 = plt.subplots()
     sns.histplot(genre_peers['averageUserRating'], bins=20, kde=True, ax=ax1)
     ax1.axvline(app_data['averageUserRating'], color='red', linestyle='--', label='Selected App')
@@ -141,8 +159,4 @@ with tab3:
     ax3.axhline(app_data['averageUserRating'], color='red', linestyle='--')
     ax3.axvline(app_data['userRatingCount'], color='red', linestyle='--')
     ax3.set_title("Review Volume vs. Rating")
-    st.pyplot(fig3)
-    
-# Footer
-st.markdown("---")
-st.markdown("Made by Nandita Ghildyal | Syracuse University | Powered by Streamlit & Parquet")
+    st.pyplot(fig3
