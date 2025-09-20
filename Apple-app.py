@@ -112,10 +112,14 @@ with tab3:
     if search_term_exp:
         filtered_explorer = filtered_explorer[filtered_explorer['trackName'].str.contains(search_term_exp, case=False)]
 
-    # Display clean table
+    # Display clean table safely
     display_cols = ['trackName', 'primaryGenreName', 'averageUserRating', 'userRatingCount', 'formattedPrice', 'contentAdvisoryRating']
-    st.dataframe(filtered_explorer[display_cols], use_container_width=True, hide_index=True)
+    valid_cols = [col for col in display_cols if col in filtered_explorer.columns]
 
+    if valid_cols:
+        st.dataframe(filtered_explorer[valid_cols], use_container_width=True, hide_index=True)
+    else:
+        st.warning("No valid columns found to display.")
     # App selection
     selected_app = st.selectbox("📌 Select an App to Explore", filtered_explorer['trackName'].unique())
 
