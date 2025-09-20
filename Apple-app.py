@@ -177,20 +177,28 @@ def render_explorer_tab():
     ) if genre_subset['userRatingCount'].std() > 0 else 0
 
         # ------------------ Metrics ------------------
+    
     st.markdown(f"### 📱 {app_data['trackName']}")
 
-    with st.container():
-        row1 = st.columns(4)
-        row1[0].metric("Rating", f"{app_data['averageUserRating']}")
-        row1[1].metric("Reviews", f"{app_data['userRatingCount']}")
-        row1[2].metric("Price", f"{app_data['formattedPrice']}")
-        row1[3].metric("Genre", genre)
+    # First Row: Core App Info
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("Rating", f"{app_data['averageUserRating']}")
+    with col2:
+        st.metric("Reviews", f"{app_data['userRatingCount']}")
+    with col3:
+        st.metric("Price", f"{app_data['formattedPrice']}")
+    with col4:
+        st.metric("Genre", genre)
 
-    with st.container():
-        row2 = st.columns(3)
-        row2[0].metric("Advisory", app_data['contentAdvisoryRating'])
-        row2[1].metric("Rating Percentile", f"{rating_percentile}%")
-        row2[2].metric("Review Z-Score", f"{z_score_reviews:.2f}")
+    # Second Row: Advisory + Comparative Metrics
+    col5, col6, col7 = st.columns(3)
+    with col5:
+        st.metric("Advisory", app_data['contentAdvisoryRating'])
+    with col6:
+        st.metric("Rating Percentile", f"{rating_percentile}%")
+    with col7:
+        st.metric("Review Z-Score", f"{z_score_reviews:.2f}")
 
     # ------------------ Charts ------------------
     chart1, chart2 = st.columns(2)
