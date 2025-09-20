@@ -120,26 +120,26 @@ def render_top_apps_tab():
 def render_explorer_tab():
     st.subheader("Explore Filtered Apps")
 
-    # Filters
-    min_rating_exp = st.slider("Minimum Rating", 0.0, 5.0, 3.0, key="exp_rating")
-    price_filter_exp = st.selectbox("Price Type", ["All", "Free", "Paid"], key="exp_price")
+    # ------------------ Filters ------------------
+    min_rating = st.slider("Minimum Rating", 0.0, 5.0, 3.0, key="exp_rating")
+    price_type = st.selectbox("Price Type", ["All", "Free", "Paid"], key="exp_price")
     genre_options = sorted(top_df['primaryGenreName'].dropna().unique())
-    genre_filter_exp = st.selectbox("Genre", ["All"] + genre_options, key="exp_genre")
-    search_term_exp = st.text_input("Search Title", key="exp_search")
+    genre_selected = st.selectbox("Genre", ["All"] + genre_options, key="exp_genre")
+    search_term = st.text_input("Search Title", key="exp_search")
 
-    # Apply filters
-    filtered_explorer = top_df.copy()
-    filtered_explorer = filtered_explorer[filtered_explorer['averageUserRating'] >= min_rating_exp]
-    if price_filter_exp == "Free":
-        filtered_explorer = filtered_explorer[filtered_explorer['formattedPrice'] == 'Free']
-    elif price_filter_exp == "Paid":
-        filtered_explorer = filtered_explorer[filtered_explorer['formattedPrice'] != 'Free']
-    if genre_filter_exp != "All":
-        filtered_explorer = filtered_explorer[filtered_explorer['primaryGenreName'] == genre_filter_exp]
-    if search_term_exp:
-        filtered_explorer = filtered_explorer[filtered_explorer['trackName'].str.contains(search_term_exp, case=False)]
+    # ------------------ Apply Filters ------------------
+    filtered_df = top_df.copy()
+    filtered_df = filtered_df[filtered_df['averageUserRating'] >= min_rating]
+    if price_type == "Free":
+        filtered_df = filtered_df[filtered_df['formattedPrice'] == 'Free']
+    elif price_type == "Paid":
+        filtered_df = filtered_df[filtered_df['formattedPrice'] != 'Free']
+    if genre_selected != "All":
+        filtered_df = filtered_df[filtered_df['primaryGenreName'] == genre_selected]
+    if search_term:
+        filtered_df = filtered_df[filtered_df['trackName'].str.contains(search_term, case=False)]
 
-    # Display clean table with renamed columns
+    # ------------------ Display Table ------------------
     display_cols = [
         'trackName', 'primaryGenreName', 'averageUserRating',
         'userRatingCount', 'formattedPrice', 'contentAdvisoryRating'
@@ -152,108 +152,95 @@ def render_explorer_tab():
         'formattedPrice': 'Price',
         'contentAdvisoryRating': 'Advisory'
     }
-    valid_cols = [col for col in display_cols if col in filtered_explorer.columns]
-    filtered_display = filtered_explorer[valid_cols].rename(columns=pretty_names)
+    valid_cols = [col for col in display_cols if col in filtered_df.columns]
+    display_df = filtered_df[valid_cols].rename(columns=pretty_names)
 
-    if filtered_display.empty:
+    if display_df.empty:
         st.warning("No apps match the current filters.")
-    else:
-        st.dataframe(filtered_display, use_container_width=True, hide_index=True, key="explorer_table")
-    
-    # App selection
-    if not filtered_explorer.empty:
-        selected_app = st.selectbox("📌 Select an App to Explore", filtered_explorer['trackName'].unique())
-        app_data = filtered_explorer[filtered_explorer['trackName'] == selected_app].iloc[0]
+        return
 
-        # Pull genre from overview_df
-        genre_info = overview_df[overview_df['trackName'] == selected_app]
-        genre = genre_info['primaryGenreName'].iloc[0] if not genre_info.empty else "N/A"
+    st.dataframe(display_df, use_container_width=True, hide_index=True, key="explorer_table")
 
-        # Define genre_monetization
-        genre_monetization = top_df
-        genre_monetization = genre_monetization[genre_monetization['primaryGenreName'] == genre]
+    # ------------------ App Selection ------------------
+    selected_app = st.selectbox("📌 Select an App to Explore", filtered_df['trackName'].unique())
+    app_data = filtered_df[filtered_df['trackName'] == selected_app].iloc[0]
 
-        # Metrics
-        rating_percentile = round((genre_monetization['averageUserRating'] < app_data['averageUserRating']).mean() * 100, 2)
-        z_score_reviews = (
-            (app_data['userRatingCount'] - genre_monetization['userRatingCount'].mean()) /
-            genre_monetization['userRatingCount'].std()
-        ) if genre_monetization['userRatingCount'].std() > 0 else 0
+    genre_info = overview_df[overview_df['trackName'] == selected_app]
+    genre = genre_info['primaryGenreName'].iloc[0] if not genre_info.empty else "N/A"
 
-        # Top Row Title
-        st.markdown(f"### 📱 {app_data['trackName']}")
+    genre_subset = top_df[top_df['primaryGenreName'] == genre]
 
-        # First Row: Core App Info
-        row1_col1, row1_col2, row1_col3, row1_col4 = st.columns(4)
-        row1_col1.metric("Rating", f"{app_data['averageUserRating']}")
-        row1_col2.metric("Reviews", f"{app_data['userRatingCount']}")
-        row1_col3.metric("Price", f"{app_data['formattedPrice']}")
-        row1_col4.metric("Genre", genre)
+    rating_percentile = round((genre_subset['averageUserRating'] < app_data['averageUserRating']).mean() * 100, 2)
+    z_score_reviews = (
+        (app_data['userRatingCount'] - genre_subset['userRatingCount'].mean()) /
+        genre_subset['userRatingCount'].std()
+    ) if genre_subset['userRatingCount'].std() > 0 else 0
 
-        # Second Row: Advisory + Comparative Metrics
-        row2_col1, row2_col2, row2_col3 = st.columns(3)
-        row2_col1.metric("Advisory", app_data['contentAdvisoryRating'])
-        row2_col2.metric("Rating Percentile", f"{rating_percentile}%")
-        row2_col3.metric("Review Z-Score", f"{z_score_reviews:.2f}")
+    # ------------------ Metrics ------------------
+    st.markdown(f"### 📱 {app_data['trackName']}")
 
+    row1 = st.columns(4)
+    row1[0].metric("Rating", f"{app_data['averageUserRating']}")
+    row1[1].metric("Reviews", f"{app_data['userRatingCount']}")
+    row1[2].metric("Price", f"{app_data['formattedPrice']}")
+    row1[3].metric("Genre", genre)
 
-        # Chart Grid
-        grid1, grid2 = st.columns(2)
+    row2 = st.columns(3)
+    row2[0].metric("Advisory", app_data['contentAdvisoryRating'])
+    row2[1].metric("Rating Percentile", f"{rating_percentile}%")
+    row2[2].metric("Review Z-Score", f"{z_score_reviews:.2f}")
 
-        with grid1:
-            st.markdown("#### 📊 Rating Distribution")
-            fig1, ax1 = plt.subplots(figsize=(5, 3))
-            sns.histplot(genre_monetization['averageUserRating'], bins=20, kde=True, ax=ax1)
-            ax1.axvline(app_data['averageUserRating'], color='red', linestyle='--', label='Selected App')
-            ax1.set_title(f"Ratings in {genre}")
-            ax1.legend()
-            st.pyplot(fig1)
+    # ------------------ Charts ------------------
+    chart1, chart2 = st.columns(2)
 
-        with grid2:
-            # Convert price to numeric
-            genre_monetization['price_numeric'] = pd.to_numeric(genre_monetization['price'], errors='coerce')
+    with chart1:
+        st.markdown("#### Rating Distribution")
+        fig1, ax1 = plt.subplots(figsize=(5, 3))
+        sns.histplot(genre_subset['averageUserRating'], bins=20, kde=True, ax=ax1)
+        ax1.axvline(app_data['averageUserRating'], color='red', linestyle='--', label='Selected App')
+        ax1.set_title(f"Ratings in {genre}")
+        ax1.legend()
+        st.pyplot(fig1)
 
-            # Bin into price ranges
-            genre_monetization['price_bin'] = pd.cut(
-                genre_monetization['price_numeric'],
-                bins=[0, 0.99, 4.99, 9.99, 19.99, 99.99],
-                labels=["Free", "<$1", "$1–5", "$5–10", "$10+"]
-)
-            sfig2, ax2 = plt.subplots(figsize=(6, 4))
-            sns.boxplot(data=genre_monetization, x='price_bin', y='averageUserRating', ax=ax2)
-            ax2.set_title(f"Price vs. Rating — {genre}", fontsize=12)
-            ax2.set_xlabel("Price Range", fontsize=10)
-            ax2.set_ylabel("Average User Rating", fontsize=10)
-            ax2.grid(True, linestyle='--', alpha=0.4)
-            st.pyplot(fig2)
+    with chart2:
+        genre_subset['price_numeric'] = pd.to_numeric(genre_subset['price'], errors='coerce')
+        genre_subset['price_bin'] = pd.cut(
+            genre_subset['price_numeric'],
+            bins=[0, 0.99, 4.99, 9.99, 19.99, 99.99],
+            labels=["Free", "<$1", "$1–5", "$5–10", "$10+"]
+        )
+        fig2, ax2 = plt.subplots(figsize=(6, 4))
+        sns.boxplot(data=genre_subset, x='price_bin', y='averageUserRating', ax=ax2)
+        ax2.set_title(f"Price vs. Rating — {genre}", fontsize=12)
+        ax2.set_xlabel("Price Range", fontsize=10)
+        ax2.set_ylabel("Average User Rating", fontsize=10)
+        ax2.grid(True, linestyle='--', alpha=0.4)
+        st.pyplot(fig2)
 
-        # Update Timeline
-        if 'currentVersionReleaseDate' in top_df.columns and 'version' in top_df.columns:
-            update_df = top_df[top_df['trackName'] == selected_app].copy()
-            update_df['currentVersionReleaseDate'] = pd.to_datetime(update_df['currentVersionReleaseDate'], errors='coerce')
-            update_df = update_df.sort_values('currentVersionReleaseDate')
+    # ------------------ Update Timeline ------------------
+    if 'currentVersionReleaseDate' in top_df.columns and 'version' in top_df.columns:
+        update_df = top_df[top_df['trackName'] == selected_app].copy()
+        update_df['currentVersionReleaseDate'] = pd.to_datetime(update_df['currentVersionReleaseDate'], errors='coerce')
+        update_df = update_df.sort_values('currentVersionReleaseDate')
 
-            if not update_df.empty:
-                st.markdown("#### 📅 Update Timeline")
-                update_chart = alt.Chart(update_df).mark_bar().encode(
-                    x='currentVersionReleaseDate:T',
-                    y=alt.Y('version:N', title='Version'),
-                    tooltip=['version', 'currentVersionReleaseDate']
-                ).properties(width=600, height=200)
-                st.altair_chart(update_chart, use_container_width=True)
+        if not update_df.empty:
+            st.markdown("#### Update Timeline")
+            update_chart = alt.Chart(update_df).mark_bar().encode(
+                x='currentVersionReleaseDate:T',
+                y=alt.Y('version:N', title='Version'),
+                tooltip=['version', 'currentVersionReleaseDate']
+            ).properties(width=600, height=200)
+            st.altair_chart(update_chart, use_container_width=True)
 
-        # Keyword Extraction
-        if 'description' in top_df.columns:
-            desc_text = top_df[top_df['trackName'] == selected_app]['description'].fillna('').values[0]
-            vectorizer = CountVectorizer(stop_words='english', max_features=10)
-            X = vectorizer.fit_transform([desc_text])
-            keywords = vectorizer.get_feature_names_out()
+    # ------------------ Keyword Extraction ------------------
+    if 'description' in top_df.columns:
+        desc_text = top_df[top_df['trackName'] == selected_app]['description'].fillna('').values[0]
+        vectorizer = CountVectorizer(stop_words='english', max_features=10)
+        X = vectorizer.fit_transform([desc_text])
+        keywords = vectorizer.get_feature_names_out()
 
-            st.markdown("#### 🧠 Top Keywords in Description")
-            st.write(", ".join([f"`{kw}`" for kw in keywords]))
-    else:
-        st.warning("No apps match the current filters.")
-
+        st.markdown("#### Top Keywords in Description")
+        st.write(", ".join([f"`{kw}`" for kw in keywords]))
 # ------------------ MAIN ------------------
 tab1, tab2, tab3 = st.tabs(["📈 Overview", "💰 Top Apps", "🧩 Explorer"])
 with tab1: render_overview_tab()
