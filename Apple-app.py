@@ -61,6 +61,7 @@ def render_top_apps_tab():
 
     # Filters
     # Merge genre into top_df
+    global top_df
     top_df = top_df.merge(
         overview_df[['trackName', 'primaryGenreName']],
         on='trackName',
