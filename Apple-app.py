@@ -127,7 +127,12 @@ def render_top_apps_tab():
 def render_explorer_tab():
     st.subheader("Explore Filtered Apps")
 
-    
+    global top_df
+    top_df = top_df.merge(
+        overview_df[['trackName', 'primaryGenreName']],
+        on='trackName',
+        how='left'
+    )
     # Filters
     min_rating_exp = st.slider("Minimum Rating", 0.0, 5.0, 3.0, key="exp_rating")
     price_filter_exp = st.selectbox("Price Type", ["All", "Free", "Paid"], key="exp_price")
