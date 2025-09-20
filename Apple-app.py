@@ -112,22 +112,40 @@ with tab3:
     if search_term_exp:
         filtered_explorer = filtered_explorer[filtered_explorer['trackName'].str.contains(search_term_exp, case=False)]
 
-    # Ratings Histogram
-    st.subheader("📊 Ratings Distribution")
+    # Display clean table
+    display_cols = ['trackName', 'primaryGenreName', 'averageUserRating', 'userRatingCount', 'formattedPrice', 'contentAdvisoryRating']
+    st.dataframe(filtered_explorer[display_cols], use_container_width=True, hide_index=True)
+
+    # App selection
+    selected_app = st.selectbox("📌 Select an App to Explore", filtered_explorer['trackName'].unique())
+
+    app_data = filtered_explorer[filtered_explorer['trackName'] == selected_app].iloc[0]
+    st.markdown(f"### 📱 {app_data['trackName']}")
+    st.markdown(f"**Genre:** {app_data['primaryGenreName']}  \n**Rating:** {app_data['averageUserRating']} ⭐  \n**Reviews:** {app_data['userRatingCount']}  \n**Price:** {app_data['formattedPrice']}  \n**Advisory:** {app_data['contentAdvisoryRating']}")
+
+    # Genre comparison
+    genre_peers = explorer_df[explorer_df['primaryGenreName'] == app_data['primaryGenreName']]
+    fig1, ax1 = plt.subplots()
+    sns.histplot(genre_peers['averageUserRating'], bins=20, kde=True, ax=ax1)
+    ax1.axvline(app_data['averageUserRating'], color='red', linestyle='--', label='Selected App')
+    ax1.set_title(f"Rating Distribution in {app_data['primaryGenreName']}")
+    ax1.legend()
+    st.pyplot(fig1)
+
+    # Price comparison
     fig2, ax2 = plt.subplots()
-    sns.histplot(filtered_explorer['averageUserRating'], bins=20, kde=True, ax=ax2)
-    ax2.set_title("Distribution of App Ratings")
+    sns.boxplot(data=genre_peers, x='formattedPrice', y='averageUserRating', ax=ax2)
+    ax2.set_title(f"Price vs. Rating in {app_data['primaryGenreName']}")
     st.pyplot(fig2)
 
-    # Table View
-    st.subheader("📋 Filtered App Table")
-    st.dataframe(
-        filtered_explorer[['trackName', 'averageUserRating', 'userRatingCount', 'formattedPrice', 'contentAdvisoryRating', 'trackViewUrl']],
-        use_container_width=True,
-        hide_index=True
-    )
-    st.download_button("📥 Download Filtered Data", filtered_explorer.to_csv(index=False), "filtered_apps.csv")
-
+    # Review volume vs. rating
+    fig3, ax3 = plt.subplots()
+    sns.scatterplot(data=genre_peers, x='userRatingCount', y='averageUserRating', ax=ax3)
+    ax3.axhline(app_data['averageUserRating'], color='red', linestyle='--')
+    ax3.axvline(app_data['userRatingCount'], color='red', linestyle='--')
+    ax3.set_title("Review Volume vs. Rating")
+    st.pyplot(fig3)
+    
 # Footer
 st.markdown("---")
 st.markdown("Made by Nandita Ghildyal | Syracuse University | Powered by Streamlit & Parquet")
