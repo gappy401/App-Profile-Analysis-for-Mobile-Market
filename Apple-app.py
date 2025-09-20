@@ -12,12 +12,6 @@ overview_df = pd.read_parquet('data/overview.parquet')
 top_df = pd.read_parquet('data/top_apps.parquet')
 explorer_df = pd.read_parquet('data/explorer.parquet')
 
-# Sidebar filters
-st.sidebar.header("🔍 Filter Apps")
-min_rating = st.sidebar.slider("Minimum Rating", 0.0, 5.0, 3.0)
-price_filter = st.sidebar.selectbox("Price Type", ["All", "Free", "Paid"])
-search_term = st.sidebar.text_input("Search Title")
-
 # Tabs
 tab1, tab2, tab3 = st.tabs(["📈 Overview", "💰 Top Apps", "🧩 Explorer"])
 
@@ -25,15 +19,21 @@ tab1, tab2, tab3 = st.tabs(["📈 Overview", "💰 Top Apps", "🧩 Explorer"])
 with tab1:
     st.subheader("Genre-Level Profitability Signals")
 
-    # Genre summary
     genre_summary = overview_df.groupby('primaryGenreName').agg({
         'averageUserRating': 'mean',
         'userRatingCount': 'sum'
     }).reset_index().sort_values(by='userRatingCount', ascending=False)
 
-    st.dataframe(genre_summary.head(10))
+    st.dataframe(genre_summary.head(10), use_container_width=True, hide_index=True)
 
-    # Rating distribution
+    st.subheader("Genre Distribution")
+    genre_bar = alt.Chart(genre_summary).mark_bar().encode(
+        x=alt.X('primaryGenreName:N', sort='-y'),
+        y='userRatingCount:Q',
+        tooltip=['primaryGenreName', 'userRatingCount']
+    ).properties(width=800, height=400)
+    st.altair_chart(genre_bar, use_container_width=True)
+
     st.subheader("Rating Distribution by Advisory Category")
     rating_chart = alt.Chart(overview_df).mark_boxplot().encode(
         x='contentAdvisoryRating:N',
@@ -46,7 +46,10 @@ with tab1:
 with tab2:
     st.subheader("High-Rated, High-Engagement Apps")
 
-    # Filter top apps
+    min_rating = st.slider("Minimum Rating", 0.0, 5.0, 4.0)
+    price_filter = st.selectbox("Price Type", ["All", "Free", "Paid"])
+    search_term = st.text_input("Search Title")
+
     filtered_top = top_df[top_df['averageUserRating'] >= min_rating]
     if price_filter == "Free":
         filtered_top = filtered_top[filtered_top['formattedPrice'] == 'Free']
@@ -55,7 +58,6 @@ with tab2:
     if search_term:
         filtered_top = filtered_top[filtered_top['trackName'].str.contains(search_term, case=False)]
 
-    # Display top 10
     top_apps = filtered_top.sort_values(by='userRatingCount', ascending=False).head(10)
     for _, row in top_apps.iterrows():
         st.markdown(f"""
@@ -68,27 +70,41 @@ with tab2:
         </div>
         """, unsafe_allow_html=True)
 
-    # Price vs. Rating correlation
     st.subheader("Price vs. Rating Correlation")
-    st.write("Apps with higher prices don't always have better ratings. Here's the scatterplot:")
     fig, ax = plt.subplots()
     sns.scatterplot(data=filtered_top, x='price', y='averageUserRating', ax=ax)
+    ax.set_title("Price vs. Rating")
     st.pyplot(fig)
 
 # ------------------ TAB 3: EXPLORER ------------------
 with tab3:
     st.subheader("Explore Filtered Apps")
 
-    filtered_explorer = explorer_df[explorer_df['averageUserRating'] >= min_rating]
-    if price_filter == "Free":
-        filtered_explorer = filtered_explorer[filtered_explorer['formattedPrice'] == 'Free']
-    elif price_filter == "Paid":
-        filtered_explorer = filtered_explorer[filtered_explorer['formattedPrice'] != 'Free']
-    if search_term:
-        filtered_explorer = filtered_explorer[filtered_explorer['trackName'].str.contains(search_term, case=False)]
+    min_rating_exp = st.slider("Minimum Rating", 0.0, 5.0, 3.0, key="exp_rating")
+    price_filter_exp = st.selectbox("Price Type", ["All", "Free", "Paid"], key="exp_price")
+    search_term_exp = st.text_input("Search Title", key="exp_search")
 
-    st.dataframe(filtered_explorer[['trackName', 'averageUserRating', 'userRatingCount', 'formattedPrice', 'contentAdvisoryRating', 'trackViewUrl']])
+    filtered_explorer = explorer_df[explorer_df['averageUserRating'] >= min_rating_exp]
+    if price_filter_exp == "Free":
+        filtered_explorer = filtered_explorer[filtered_explorer['formattedPrice'] == 'Free']
+    elif price_filter_exp == "Paid":
+        filtered_explorer = filtered_explorer[filtered_explorer['formattedPrice'] != 'Free']
+    if search_term_exp:
+        filtered_explorer = filtered_explorer[filtered_explorer['trackName'].str.contains(search_term_exp, case=False)]
+
+    st.dataframe(
+        filtered_explorer[['trackName', 'averageUserRating', 'userRatingCount', 'formattedPrice', 'contentAdvisoryRating', 'trackViewUrl']],
+        use_container_width=True,
+        hide_index=True
+    )
+
     st.download_button("📥 Download Filtered Data", filtered_explorer.to_csv(index=False), "filtered_apps.csv")
+
+    st.subheader("Ratings Histogram")
+    fig2, ax2 = plt.subplots()
+    sns.histplot(filtered_explorer['averageUserRating'], bins=20, kde=True, ax=ax2)
+    ax2.set_title("Distribution of App Ratings")
+    st.pyplot(fig2)
 
 # Footer
 st.markdown("---")
