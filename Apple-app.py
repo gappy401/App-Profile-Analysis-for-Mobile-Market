@@ -159,4 +159,6 @@ with tab3:
     ax3.axhline(app_data['averageUserRating'], color='red', linestyle='--')
     ax3.axvline(app_data['userRatingCount'], color='red', linestyle='--')
     ax3.set_title("Review Volume vs. Rating")
-    st.pyplot(fig3
+    st.pyplot(fig3)
+    
+    
