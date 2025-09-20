@@ -18,7 +18,7 @@ DATA_PATHS = {
 def load_data():
     return (
         pd.read_parquet(DATA_PATHS["overview"]),
-        pd.read_parquet(DATA_PATHS["top"]),
+        pd.read_parquet(DATA_PATHS["top_apps"]),
         pd.read_parquet(DATA_PATHS["explorer"])
     )
 
