@@ -103,7 +103,7 @@ def render_top_apps_tab():
         for idx, app in enumerate(row.itertuples()):
             with cols[idx]:
                 st.markdown(f"""
-                <div style='border:1px solid #ccc; padding:10px; border-radius:6px; background-color:#f9f9f9;'>
+                <div style='border:1px solid #ccc; padding:10px; border-radius:6px; background-color:#000000;'>
                     <h5 style='margin-bottom:6px;'>{app.trackName}</h5>
                     <p style='margin:0; font-size:14px;'><strong>Genre:</strong> {app.primaryGenreName}</p>
                     <p style='margin:0; font-size:14px;'><strong>Rating:</strong> {app.averageUserRating} / 5</p>
@@ -155,11 +155,7 @@ def render_explorer_tab():
         genre = genre_info['primaryGenreName'].iloc[0] if not genre_info.empty else "N/A"
 
         # Define genre_monetization
-        genre_monetization = top_df.merge(
-            overview_df[['trackName', 'primaryGenreName']],
-            on='trackName',
-            how='left'
-        )
+        genre_monetization = top_df
         genre_monetization = genre_monetization[genre_monetization['primaryGenreName'] == genre]
 
         # Metrics
