@@ -104,7 +104,7 @@ with tab3:
     price_filter_exp = st.selectbox("Price Type", ["All", "Free", "Paid"], key="exp_price")
     search_term_exp = st.text_input("Search Title", key="exp_search")
 
-    filtered_explorer = explorer_df[explorer_df['averageUserRating'] >= min_rating_exp]
+    filtered_explorer = top_df[top_df['averageUserRating'] >= min_rating_exp]
     if price_filter_exp == "Free":
         filtered_explorer = filtered_explorer[filtered_explorer['formattedPrice'] == 'Free']
     elif price_filter_exp == "Paid":
@@ -112,23 +112,26 @@ with tab3:
     if search_term_exp:
         filtered_explorer = filtered_explorer[filtered_explorer['trackName'].str.contains(search_term_exp, case=False)]
 
-    # Display clean table safely
+    # Display clean table
     display_cols = ['trackName', 'primaryGenreName', 'averageUserRating', 'userRatingCount', 'formattedPrice', 'contentAdvisoryRating']
     valid_cols = [col for col in display_cols if col in filtered_explorer.columns]
+    st.dataframe(filtered_explorer[valid_cols], use_container_width=True, hide_index=True)
 
-    if valid_cols:
-        st.dataframe(filtered_explorer[valid_cols], use_container_width=True, hide_index=True)
-    else:
-        st.warning("No valid columns found to display.")
     # App selection
     selected_app = st.selectbox("📌 Select an App to Explore", filtered_explorer['trackName'].unique())
 
     app_data = filtered_explorer[filtered_explorer['trackName'] == selected_app].iloc[0]
     st.markdown(f"### 📱 {app_data['trackName']}")
-    st.markdown(f"**Genre:** {app_data['primaryGenreName']}  \n**Rating:** {app_data['averageUserRating']} ⭐  \n**Reviews:** {app_data['userRatingCount']}  \n**Price:** {app_data['formattedPrice']}  \n**Advisory:** {app_data['contentAdvisoryRating']}")
+    st.markdown(f"""
+    **Genre:** {app_data.get('primaryGenreName', 'N/A')}  
+    **Rating:** {app_data.get('averageUserRating', 'N/A')} ⭐  
+    **Reviews:** {app_data.get('userRatingCount', 'N/A')}  
+    **Price:** {app_data.get('formattedPrice', 'N/A')}  
+    **Advisory:** {app_data.get('contentAdvisoryRating', 'N/A')}
+    """)
 
     # Genre comparison
-    genre_peers = explorer_df[explorer_df['primaryGenreName'] == app_data['primaryGenreName']]
+    genre_peers = top_df[top_df['primaryGenreName'] == app_data.get('primaryGenreName')]
     fig1, ax1 = plt.subplots()
     sns.histplot(genre_peers['averageUserRating'], bins=20, kde=True, ax=ax1)
     ax1.axvline(app_data['averageUserRating'], color='red', linestyle='--', label='Selected App')
