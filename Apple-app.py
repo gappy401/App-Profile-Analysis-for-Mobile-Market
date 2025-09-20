@@ -105,8 +105,110 @@ def render_top_apps_tab():
     st.pyplot(fig)
 
 def render_explorer_tab():
-    # Your full Explorer tab logic goes here (already well-structured)
-    pass  # Placeholder for brevity
+    st.subheader("🔍 Explore Filtered Apps")
+
+    # Filters
+    min_rating_exp = st.slider("Minimum Rating", 0.0, 5.0, 3.0, key="exp_rating")
+    price_filter_exp = st.selectbox("Price Type", ["All", "Free", "Paid"], key="exp_price")
+    search_term_exp = st.text_input("Search Title", key="exp_search")
+
+    filtered_explorer = top_df[top_df['averageUserRating'] >= min_rating_exp]
+    if price_filter_exp == "Free":
+        filtered_explorer = filtered_explorer[filtered_explorer['formattedPrice'] == 'Free']
+    elif price_filter_exp == "Paid":
+        filtered_explorer = filtered_explorer[filtered_explorer['formattedPrice'] != 'Free']
+    if search_term_exp:
+        filtered_explorer = filtered_explorer[filtered_explorer['trackName'].str.contains(search_term_exp, case=False)]
+
+    # Display clean table
+    display_cols = ['trackName', 'averageUserRating', 'userRatingCount', 'formattedPrice', 'contentAdvisoryRating']
+    valid_cols = [col for col in display_cols if col in filtered_explorer.columns]
+    st.dataframe(filtered_explorer[valid_cols], use_container_width=True, hide_index=True)
+
+    # App selection
+    if not filtered_explorer.empty:
+        selected_app = st.selectbox("📌 Select an App to Explore", filtered_explorer['trackName'].unique())
+        app_data = filtered_explorer[filtered_explorer['trackName'] == selected_app].iloc[0]
+
+        # Pull genre from overview_df
+        genre_info = overview_df[overview_df['trackName'] == selected_app]
+        genre = genre_info['primaryGenreName'].iloc[0] if not genre_info.empty else "N/A"
+
+        # Define genre_monetization
+        genre_monetization = top_df.merge(
+            overview_df[['trackName', 'primaryGenreName']],
+            on='trackName',
+            how='left'
+        )
+        genre_monetization = genre_monetization[genre_monetization['primaryGenreName'] == genre]
+
+        # Metrics
+        rating_percentile = round((genre_monetization['averageUserRating'] < app_data['averageUserRating']).mean() * 100, 2)
+        z_score_reviews = (
+            (app_data['userRatingCount'] - genre_monetization['userRatingCount'].mean()) /
+            genre_monetization['userRatingCount'].std()
+        ) if genre_monetization['userRatingCount'].std() > 0 else 0
+
+        # Top Row
+        st.markdown(f"### 📱 {app_data['trackName']}")
+        col1, col2, col3, col4, col5, col6, col7 = st.columns(7)
+        col1.metric("⭐ Rating", f"{app_data['averageUserRating']}")
+        col2.metric("📝 Reviews", f"{app_data['userRatingCount']}")
+        col3.metric("💰 Price", f"{app_data['formattedPrice']}")
+        col4.metric("🎯 Genre", genre)
+        col5.metric("⚠️ Advisory", app_data['contentAdvisoryRating'])
+        col6.metric("📈 Rating Percentile", f"{rating_percentile}%")
+        col7.metric("📊 Review Z-Score", f"{z_score_reviews:.2f}")
+
+        # Chart Grid
+        grid1, grid2 = st.columns(2)
+
+        with grid1:
+            st.markdown("#### 📊 Rating Distribution")
+            fig1, ax1 = plt.subplots(figsize=(5, 3))
+            sns.histplot(genre_monetization['averageUserRating'], bins=20, kde=True, ax=ax1)
+            ax1.axvline(app_data['averageUserRating'], color='red', linestyle='--', label='Selected App')
+            ax1.set_title(f"Ratings in {genre}")
+            ax1.legend()
+            st.pyplot(fig1)
+
+        with grid2:
+            st.markdown("#### 💸 Price vs. Rating in Genre")
+            fig2, ax2 = plt.subplots(figsize=(5, 3))
+            sns.boxplot(data=genre_monetization, x='formattedPrice', y='averageUserRating', ax=ax2)
+            ax2.set_title(f"Price vs. Rating — {genre}", fontsize=12)
+            ax2.set_xlabel("Price Category", fontsize=10)
+            ax2.set_ylabel("Average User Rating", fontsize=10)
+            ax2.grid(True, linestyle='--', alpha=0.4)
+            ax2.tick_params(axis='x', labelrotation=45)
+            st.pyplot(fig2)
+
+        # Update Timeline
+        if 'currentVersionReleaseDate' in top_df.columns and 'version' in top_df.columns:
+            update_df = top_df[top_df['trackName'] == selected_app].copy()
+            update_df['currentVersionReleaseDate'] = pd.to_datetime(update_df['currentVersionReleaseDate'], errors='coerce')
+            update_df = update_df.sort_values('currentVersionReleaseDate')
+
+            if not update_df.empty:
+                st.markdown("#### 📅 Update Timeline")
+                update_chart = alt.Chart(update_df).mark_bar().encode(
+                    x='currentVersionReleaseDate:T',
+                    y=alt.Y('version:N', title='Version'),
+                    tooltip=['version', 'currentVersionReleaseDate']
+                ).properties(width=600, height=200)
+                st.altair_chart(update_chart, use_container_width=True)
+
+        # Keyword Extraction
+        if 'description' in top_df.columns:
+            desc_text = top_df[top_df['trackName'] == selected_app]['description'].fillna('').values[0]
+            vectorizer = CountVectorizer(stop_words='english', max_features=10)
+            X = vectorizer.fit_transform([desc_text])
+            keywords = vectorizer.get_feature_names_out()
+
+            st.markdown("#### 🧠 Top Keywords in Description")
+            st.write(", ".join([f"`{kw}`" for kw in keywords]))
+    else:
+        st.warning("No apps match the current filters.")
 
 # ------------------ MAIN ------------------
 tab1, tab2, tab3 = st.tabs(["📈 Overview", "💰 Top Apps", "🧩 Explorer"])
