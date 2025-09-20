@@ -74,25 +74,34 @@ with tab2:
         col1.metric("⭐ Highest Rated", top_rated['trackName'], f"{top_rated['averageUserRating']} stars")
         col2.metric("🔥 Most Reviewed", most_reviewed['trackName'], f"{most_reviewed['userRatingCount']} reviews")
 
-    # App Cards
-    st.subheader("📱 Top 10 Apps")
-    top_apps = filtered_top.sort_values(by='userRatingCount', ascending=False).head(10)
-    for _, row in top_apps.iterrows():
-        st.markdown(f"""
-        <div style='border:1px solid #ddd; padding:10px; margin:10px; border-radius:8px'>
-            <h4>{row['trackName']}</h4>
-            <p><strong>Rating:</strong> {row['averageUserRating']} ⭐</p>
-            <p><strong>Price:</strong> {row['formattedPrice']}</p>
-            <p><strong>Advisory:</strong> {row['contentAdvisoryRating']}</p>
-            <a href="{row['trackViewUrl']}" target="_blank">🔗 View on App Store</a>
-        </div>
-        """, unsafe_allow_html=True)
+    # 📱 Top 12 Apps in a 4x3 Grid
+    st.subheader("📱 Top 12 Apps")
+    top_apps = filtered_top.sort_values(by='userRatingCount', ascending=False).head(12)
+    rows = [top_apps.iloc[i:i+4] for i in range(0, len(top_apps), 4)]
 
-    # Scatterplot
+    for row in rows:
+        cols = st.columns(len(row))
+        for idx, app in enumerate(row.itertuples()):
+            with cols[idx]:
+                st.markdown(f"""
+                <div style='border:1px solid #ddd; padding:10px; border-radius:8px; background-color:#f9f9f9'>
+                    <h5 style='margin-bottom:5px'>{app.trackName}</h5>
+                    <p style='margin:0'><strong>Rating:</strong> {app.averageUserRating} ⭐</p>
+                    <p style='margin:0'><strong>Reviews:</strong> {app.userRatingCount}</p>
+                    <p style='margin:0'><strong>Price:</strong> {app.formattedPrice}</p>
+                    <p style='margin:0'><strong>Advisory:</strong> {app.contentAdvisoryRating}</p>
+                    <a href="{app.trackViewUrl}" target="_blank">🔗 View</a>
+                </div>
+                """, unsafe_allow_html=True)
+
+    # 💸 Price vs. Rating Scatterplot
     st.subheader("💸 Price vs. Rating")
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(6, 4))
     sns.scatterplot(data=filtered_top, x='price', y='averageUserRating', ax=ax)
-    ax.set_title("Price vs. Rating")
+    ax.set_title("Price vs. Rating", fontsize=12)
+    ax.set_xlabel("Price ($)", fontsize=10)
+    ax.set_ylabel("Average User Rating", fontsize=10)
+    ax.grid(True, linestyle='--', alpha=0.4)
     st.pyplot(fig)
 
 # ------------------ TAB 3: EXPLORER ------------------
