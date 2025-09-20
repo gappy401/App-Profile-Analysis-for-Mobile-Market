@@ -164,10 +164,13 @@ with tab3:
         st.pyplot(fig1)
 
     with grid2:
-        st.markdown("#### 💸 Price vs. Rating")
+        st.markdown("#### 💸 Price vs. Rating in Genre")
         fig2, ax2 = plt.subplots(figsize=(5, 3))
         sns.boxplot(data=genre_monetization, x='formattedPrice', y='averageUserRating', ax=ax2)
-        ax2.set_title(f"Price vs. Rating in {genre}")
+        ax2.set_title(f"Price vs. Rating — {genre}", fontsize=12)
+        ax2.set_xlabel("Price Category", fontsize=10)
+        ax2.set_ylabel("Average User Rating", fontsize=10)
+        ax2.grid(True, linestyle='--', alpha=0.4)
         st.pyplot(fig2)
 
     # 📅 Update Timeline (if available)
