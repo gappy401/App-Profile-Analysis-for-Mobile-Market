@@ -125,26 +125,49 @@ def render_top_apps_tab():
     st.pyplot(fig)
 
 def render_explorer_tab():
-    st.subheader("🔍 Explore Filtered Apps")
+    st.subheader("Explore Filtered Apps")
+
+    # Merge genre into top_df if not already present
+    top_df_with_genre = top_df.merge(
+        overview_df[['trackName', 'primaryGenreName']],
+        on='trackName',
+        how='left'
+    )
 
     # Filters
     min_rating_exp = st.slider("Minimum Rating", 0.0, 5.0, 3.0, key="exp_rating")
     price_filter_exp = st.selectbox("Price Type", ["All", "Free", "Paid"], key="exp_price")
+    genre_options = sorted(top_df_with_genre['primaryGenreName'].dropna().unique())
+    genre_filter_exp = st.selectbox("Genre", ["All"] + genre_options, key="exp_genre")
     search_term_exp = st.text_input("Search Title", key="exp_search")
 
-    filtered_explorer = top_df[top_df['averageUserRating'] >= min_rating_exp]
+    # Apply filters
+    filtered_explorer = top_df_with_genre[top_df_with_genre['averageUserRating'] >= min_rating_exp]
     if price_filter_exp == "Free":
         filtered_explorer = filtered_explorer[filtered_explorer['formattedPrice'] == 'Free']
     elif price_filter_exp == "Paid":
         filtered_explorer = filtered_explorer[filtered_explorer['formattedPrice'] != 'Free']
+    if genre_filter_exp != "All":
+        filtered_explorer = filtered_explorer[filtered_explorer['primaryGenreName'] == genre_filter_exp]
     if search_term_exp:
         filtered_explorer = filtered_explorer[filtered_explorer['trackName'].str.contains(search_term_exp, case=False)]
 
-    # Display clean table
-    display_cols = ['trackName', 'averageUserRating', 'userRatingCount', 'formattedPrice', 'contentAdvisoryRating']
+    # Display clean table with renamed columns
+    display_cols = [
+        'trackName', 'primaryGenreName', 'averageUserRating',
+        'userRatingCount', 'formattedPrice', 'contentAdvisoryRating'
+    ]
     valid_cols = [col for col in display_cols if col in filtered_explorer.columns]
-    st.dataframe(filtered_explorer[valid_cols], use_container_width=True, hide_index=True)
-
+    pretty_names = {
+        'trackName': 'App Title',
+        'primaryGenreName': 'Genre',
+        'averageUserRating': 'Avg Rating',
+        'userRatingCount': 'Review Count',
+        'formattedPrice': 'Price',
+        'contentAdvisoryRating': 'Advisory'
+    }
+    filtered_display = filtered_explorer[valid_cols].rename(columns=pretty_names)
+    st.dataframe(filtered_display, use_container_width=True, hide_index=True)
     # App selection
     if not filtered_explorer.empty:
         selected_app = st.selectbox("📌 Select an App to Explore", filtered_explorer['trackName'].unique())
