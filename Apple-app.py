@@ -143,31 +143,41 @@ with tab3:
     )
     genre_monetization = genre_monetization[genre_monetization['primaryGenreName'] == genre]
 
-    # 📊 Rating Distribution in Genre
-    st.markdown("#### 📊 Rating Distribution in Genre")
-    col1, col2 = st.columns([2, 1])
-    with col1:
-        fig1, ax1 = plt.subplots(figsize=(6, 3))
-        sns.histplot(genre_monetization['averageUserRating'], bins=20, kde=True, ax=ax1)
-        ax1.axvline(app_data['averageUserRating'], color='red', linestyle='--', label='Selected App')
-        ax1.set_title(f"Ratings in {genre}")
-        ax1.legend()
-        st.pyplot(fig1)
-    with col2:
-        st.metric("Selected App Rating", f"{app_data['averageUserRating']} ⭐")
+    # 📈 Percentile Rank for Rating
+    if not genre_monetization.empty:
+        rating_percentile = round((genre_monetization['averageUserRating'] < app_data['averageUserRating']).mean() * 100, 2)
+        st.markdown(f"#### 📈 Rating Percentile")
+        st.info(f"This app ranks in the top **{rating_percentile}%** of {genre} apps by average user rating.")
 
-    # 💸 Price vs. Rating
-    st.markdown("#### 💸 Price vs. Rating in Genre")
-    fig2, ax2 = plt.subplots(figsize=(6, 3))
-    sns.boxplot(data=genre_monetization, x='formattedPrice', y='averageUserRating', ax=ax2)
-    ax2.set_title(f"Price vs. Rating in {genre}")
-    st.pyplot(fig2)
+    # 📊 Z-Score for Review Volume
+    if genre_monetization['userRatingCount'].std() > 0:
+        z_score_reviews = (app_data['userRatingCount'] - genre_monetization['userRatingCount'].mean()) / genre_monetization['userRatingCount'].std()
+        st.markdown("#### 📊 Review Volume Z-Score")
+        st.info(f"This app has a review volume **{z_score_reviews:.2f} standard deviations** above the genre average.")
 
-    # 🔥 Review Volume vs. Rating
-    st.markdown("#### 🔥 Review Volume vs. Rating")
-    fig3, ax3 = plt.subplots(figsize=(6, 3))
-    sns.scatterplot(data=genre_monetization, x='userRatingCount', y='averageUserRating', ax=ax3)
-    ax3.axhline(app_data['averageUserRating'], color='red', linestyle='--')
-    ax3.axvline(app_data['userRatingCount'], color='red', linestyle='--')
-    ax3.set_title("Review Volume vs. Rating")
-    st.pyplot(fig3)
+    # 📅 Update Frequency (if available)
+    if 'currentVersionReleaseDate' in top_df.columns and 'version' in top_df.columns:
+        update_df = top_df[top_df['trackName'] == selected_app].copy()
+        update_df['currentVersionReleaseDate'] = pd.to_datetime(update_df['currentVersionReleaseDate'], errors='coerce')
+        update_df = update_df.sort_values('currentVersionReleaseDate')
+
+        if not update_df.empty:
+            st.markdown("#### 📅 Update Timeline")
+            update_chart = alt.Chart(update_df).mark_bar().encode(
+                x='currentVersionReleaseDate:T',
+                y=alt.Y('version:N', title='Version'),
+                tooltip=['version', 'currentVersionReleaseDate']
+            ).properties(width=600, height=200)
+            st.altair_chart(update_chart, use_container_width=True)
+
+    # 🧠 Keyword Extraction from Description
+    if 'description' in top_df.columns:
+        from sklearn.feature_extraction.text import CountVectorizer
+
+        desc_text = top_df[top_df['trackName'] == selected_app]['description'].fillna('').values[0]
+        vectorizer = CountVectorizer(stop_words='english', max_features=10)
+        X = vectorizer.fit_transform([desc_text])
+        keywords = vectorizer.get_feature_names_out()
+
+        st.markdown("#### 🧠 Top Keywords in Description")
+        st.write(", ".join([f"`{kw}`" for kw in keywords]))
