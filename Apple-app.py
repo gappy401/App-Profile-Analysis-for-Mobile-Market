@@ -62,7 +62,7 @@ def render_top_apps_tab():
     # Filters
     min_rating = st.slider("Minimum Rating", 0.0, 5.0, 4.0)
     price_filter = st.selectbox("Price Type", ["All", "Free", "Paid"])
-    genre_options = sorted(top_df['primaryGenreName'].dropna().unique())
+    genre_options = sorted(overview_df['primaryGenreName'].dropna().unique())
     genre_filter = st.selectbox("Genre", ["All"] + genre_options)
     search_term = st.text_input("Search Title")
 
