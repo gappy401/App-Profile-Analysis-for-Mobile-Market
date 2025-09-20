@@ -125,16 +125,6 @@ with tab3:
     genre_info = overview_df[overview_df['trackName'] == selected_app]
     genre = genre_info['primaryGenreName'].iloc[0] if not genre_info.empty else "N/A"
 
-    # Display app summary
-    st.markdown(f"### 📱 {app_data['trackName']}")
-    st.markdown(f"""
-    **Genre:** {genre}  
-    **Rating:** {app_data.get('averageUserRating', 'N/A')} ⭐  
-    **Reviews:** {app_data.get('userRatingCount', 'N/A')}  
-    **Price:** {app_data.get('formattedPrice', 'N/A')}  
-    **Advisory:** {app_data.get('contentAdvisoryRating', 'N/A')}
-    """)
-
     # Define genre_monetization
     genre_monetization = top_df.merge(
         overview_df[['trackName', 'primaryGenreName']],
@@ -143,19 +133,44 @@ with tab3:
     )
     genre_monetization = genre_monetization[genre_monetization['primaryGenreName'] == genre]
 
-    # 📈 Percentile Rank for Rating
-    if not genre_monetization.empty:
-        rating_percentile = round((genre_monetization['averageUserRating'] < app_data['averageUserRating']).mean() * 100, 2)
-        st.markdown(f"#### 📈 Rating Percentile")
-        st.info(f"This app ranks in the top **{rating_percentile}%** of {genre} apps by average user rating.")
+    # Calculate metrics
+    rating_percentile = round((genre_monetization['averageUserRating'] < app_data['averageUserRating']).mean() * 100, 2)
+    z_score_reviews = (
+        (app_data['userRatingCount'] - genre_monetization['userRatingCount'].mean()) /
+        genre_monetization['userRatingCount'].std()
+    ) if genre_monetization['userRatingCount'].std() > 0 else 0
 
-    # 📊 Z-Score for Review Volume
-    if genre_monetization['userRatingCount'].std() > 0:
-        z_score_reviews = (app_data['userRatingCount'] - genre_monetization['userRatingCount'].mean()) / genre_monetization['userRatingCount'].std()
-        st.markdown("#### 📊 Review Volume Z-Score")
-        st.info(f"This app has a review volume **{z_score_reviews:.2f} standard deviations** above the genre average.")
+    # 🔝 Top Row: App Summary + Metrics
+    st.markdown(f"### 📱 {app_data['trackName']}")
+    col1, col2, col3, col4, col5, col6, col7 = st.columns(7)
+    col1.metric("⭐ Rating", f"{app_data['averageUserRating']}")
+    col2.metric("📝 Reviews", f"{app_data['userRatingCount']}")
+    col3.metric("💰 Price", f"{app_data['formattedPrice']}")
+    col4.metric("🎯 Genre", genre)
+    col5.metric("⚠️ Advisory", app_data['contentAdvisoryRating'])
+    col6.metric("📈 Rating Percentile", f"{rating_percentile}%")
+    col7.metric("📊 Review Z-Score", f"{z_score_reviews:.2f}")
 
-    # 📅 Update Frequency (if available)
+    # 🔽 Second Row: Chart Grid
+    grid1, grid2 = st.columns(2)
+
+    with grid1:
+        st.markdown("#### 📊 Rating Distribution")
+        fig1, ax1 = plt.subplots(figsize=(5, 3))
+        sns.histplot(genre_monetization['averageUserRating'], bins=20, kde=True, ax=ax1)
+        ax1.axvline(app_data['averageUserRating'], color='red', linestyle='--', label='Selected App')
+        ax1.set_title(f"Ratings in {genre}")
+        ax1.legend()
+        st.pyplot(fig1)
+
+    with grid2:
+        st.markdown("#### 💸 Price vs. Rating")
+        fig2, ax2 = plt.subplots(figsize=(5, 3))
+        sns.boxplot(data=genre_monetization, x='formattedPrice', y='averageUserRating', ax=ax2)
+        ax2.set_title(f"Price vs. Rating in {genre}")
+        st.pyplot(fig2)
+
+    # 📅 Update Timeline (if available)
     if 'currentVersionReleaseDate' in top_df.columns and 'version' in top_df.columns:
         update_df = top_df[top_df['trackName'] == selected_app].copy()
         update_df['currentVersionReleaseDate'] = pd.to_datetime(update_df['currentVersionReleaseDate'], errors='coerce')
