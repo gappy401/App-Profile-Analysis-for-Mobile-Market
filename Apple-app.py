@@ -171,6 +171,7 @@ with tab3:
         ax2.set_xlabel("Price Category", fontsize=10)
         ax2.set_ylabel("Average User Rating", fontsize=10)
         ax2.grid(True, linestyle='--', alpha=0.4)
+        ax2.tick_params(axis='x', labelrotation=45)
         st.pyplot(fig2)
 
     # 📅 Update Timeline (if available)
