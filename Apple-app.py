@@ -176,19 +176,21 @@ def render_explorer_tab():
         genre_subset['userRatingCount'].std()
     ) if genre_subset['userRatingCount'].std() > 0 else 0
 
-    # ------------------ Metrics ------------------
+        # ------------------ Metrics ------------------
     st.markdown(f"### 📱 {app_data['trackName']}")
 
-    row1 = st.columns(4)
-    row1[0].metric("Rating", f"{app_data['averageUserRating']}")
-    row1[1].metric("Reviews", f"{app_data['userRatingCount']}")
-    row1[2].metric("Price", f"{app_data['formattedPrice']}")
-    row1[3].metric("Genre", genre)
+    with st.container():
+        row1 = st.columns(4)
+        row1[0].metric("Rating", f"{app_data['averageUserRating']}")
+        row1[1].metric("Reviews", f"{app_data['userRatingCount']}")
+        row1[2].metric("Price", f"{app_data['formattedPrice']}")
+        row1[3].metric("Genre", genre)
 
-    row2 = st.columns(3)
-    row2[0].metric("Advisory", app_data['contentAdvisoryRating'])
-    row2[1].metric("Rating Percentile", f"{rating_percentile}%")
-    row2[2].metric("Review Z-Score", f"{z_score_reviews:.2f}")
+    with st.container():
+        row2 = st.columns(3)
+        row2[0].metric("Advisory", app_data['contentAdvisoryRating'])
+        row2[1].metric("Rating Percentile", f"{rating_percentile}%")
+        row2[2].metric("Review Z-Score", f"{z_score_reviews:.2f}")
 
     # ------------------ Charts ------------------
     chart1, chart2 = st.columns(2)
