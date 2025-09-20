@@ -128,7 +128,8 @@ def render_explorer_tab():
     search_term_exp = st.text_input("Search Title", key="exp_search")
 
     # Apply filters
-    filtered_explorer = top_df[top_df['averageUserRating'] >= min_rating_exp]
+    filtered_explorer = top_df.copy()
+    filtered_explorer = filtered_explorer[filtered_explorer['averageUserRating'] >= min_rating_exp]
     if price_filter_exp == "Free":
         filtered_explorer = filtered_explorer[filtered_explorer['formattedPrice'] == 'Free']
     elif price_filter_exp == "Paid":
@@ -143,7 +144,6 @@ def render_explorer_tab():
         'trackName', 'primaryGenreName', 'averageUserRating',
         'userRatingCount', 'formattedPrice', 'contentAdvisoryRating'
     ]
-    valid_cols = [col for col in display_cols if col in filtered_explorer.columns]
     pretty_names = {
         'trackName': 'App Title',
         'primaryGenreName': 'Genre',
@@ -152,8 +152,14 @@ def render_explorer_tab():
         'formattedPrice': 'Price',
         'contentAdvisoryRating': 'Advisory'
     }
+    valid_cols = [col for col in display_cols if col in filtered_explorer.columns]
     filtered_display = filtered_explorer[valid_cols].rename(columns=pretty_names)
-    st.dataframe(filtered_display, use_container_width=True, hide_index=True)
+
+    if filtered_display.empty:
+        st.warning("No apps match the current filters.")
+    else:
+        st.dataframe(filtered_display, use_container_width=True, hide_index=True, key="explorer_table")
+    
     # App selection
     if not filtered_explorer.empty:
         selected_app = st.selectbox("📌 Select an App to Explore", filtered_explorer['trackName'].unique())
