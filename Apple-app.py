@@ -176,7 +176,7 @@ def render_explorer_tab():
         genre_subset['userRatingCount'].std()
     ) if genre_subset['userRatingCount'].std() > 0 else 0
 
-        # ------------------ Metrics ------------------
+    # ------------------ Metrics ------------------
     
     st.markdown(f"### 📱 {app_data['trackName']}")
 
@@ -189,7 +189,7 @@ def render_explorer_tab():
     col_genre.metric(label="Genre", value=genre)
 
     # Spacer for visual breathing room
-    st.markdown("")
+    st.markdown("                                ")
 
     # Second Row: Advisory + Comparative Metrics
     col_advisory, col_percentile, col_zscore = st.columns([1, 1, 1])
