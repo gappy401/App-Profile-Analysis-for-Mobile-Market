@@ -135,18 +135,24 @@ with tab3:
     **Advisory:** {app_data.get('contentAdvisoryRating', 'N/A')}
     """)
 
+    # Define genre_monetization
+    genre_monetization = top_df.merge(
+        overview_df[['trackName', 'primaryGenreName']],
+        on='trackName',
+        how='left'
+    )
+    genre_monetization = genre_monetization[genre_monetization['primaryGenreName'] == genre]
+
     # 📊 Rating Distribution in Genre
-    genre_peers = overview_df[overview_df['primaryGenreName'] == genre]
     st.markdown("#### 📊 Rating Distribution in Genre")
     col1, col2 = st.columns([2, 1])
     with col1:
         fig1, ax1 = plt.subplots(figsize=(6, 3))
-        sns.histplot(genre_peers['averageUserRating'], bins=20, kde=True, ax=ax1)
+        sns.histplot(genre_monetization['averageUserRating'], bins=20, kde=True, ax=ax1)
         ax1.axvline(app_data['averageUserRating'], color='red', linestyle='--', label='Selected App')
         ax1.set_title(f"Ratings in {genre}")
         ax1.legend()
         st.pyplot(fig1)
-
     with col2:
         st.metric("Selected App Rating", f"{app_data['averageUserRating']} ⭐")
 
@@ -165,4 +171,3 @@ with tab3:
     ax3.axvline(app_data['userRatingCount'], color='red', linestyle='--')
     ax3.set_title("Review Volume vs. Rating")
     st.pyplot(fig3)
-    
