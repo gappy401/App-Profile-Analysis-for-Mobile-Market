@@ -188,8 +188,7 @@ def render_explorer_tab():
     col_price.metric(label="Price", value=f"{app_data['formattedPrice']}")
     col_genre.metric(label="Genre", value=genre)
 
-    # Spacer for visual breathing room
-    st.markdown("                                ")
+ 
 
     # Second Row: Advisory + Comparative Metrics
     col_advisory, col_percentile, col_zscore = st.columns([1, 1, 1])
