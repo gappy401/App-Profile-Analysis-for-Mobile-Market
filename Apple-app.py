@@ -127,22 +127,16 @@ def render_top_apps_tab():
 def render_explorer_tab():
     st.subheader("Explore Filtered Apps")
 
-    # Merge genre into top_df if not already present
-    top_df_with_genre = top_df.merge(
-        overview_df[['trackName', 'primaryGenreName']],
-        on='trackName',
-        how='left'
-    )
-
+    
     # Filters
     min_rating_exp = st.slider("Minimum Rating", 0.0, 5.0, 3.0, key="exp_rating")
     price_filter_exp = st.selectbox("Price Type", ["All", "Free", "Paid"], key="exp_price")
-    genre_options = sorted(top_df_with_genre['primaryGenreName'].dropna().unique())
+    genre_options = sorted(top_df['primaryGenreName'].dropna().unique())
     genre_filter_exp = st.selectbox("Genre", ["All"] + genre_options, key="exp_genre")
     search_term_exp = st.text_input("Search Title", key="exp_search")
 
     # Apply filters
-    filtered_explorer = top_df_with_genre[top_df_with_genre['averageUserRating'] >= min_rating_exp]
+    filtered_explorer = top_df[top_df['averageUserRating'] >= min_rating_exp]
     if price_filter_exp == "Free":
         filtered_explorer = filtered_explorer[filtered_explorer['formattedPrice'] == 'Free']
     elif price_filter_exp == "Paid":
