@@ -77,21 +77,24 @@ def render_top_apps_tab():
         col1.metric("⭐ Highest Rated", top_rated['trackName'], f"{top_rated['averageUserRating']} stars")
         col2.metric("🔥 Most Reviewed", most_reviewed['trackName'], f"{most_reviewed['userRatingCount']} reviews")
 
-    st.subheader("📱 Top 12 Apps")
+    # Top 12 Apps in a 4x3 Grid
+    st.subheader("Top 12 Apps")
+
     top_apps = filtered_top.sort_values(by='userRatingCount', ascending=False).head(12)
     rows = [top_apps.iloc[i:i+4] for i in range(0, len(top_apps), 4)]
+
     for row in rows:
         cols = st.columns(len(row))
         for idx, app in enumerate(row.itertuples()):
             with cols[idx]:
                 st.markdown(f"""
-                <div style='border:1px solid #ddd; padding:10px; border-radius:8px; background-color:#f9f9f9'>
-                    <h5 style='margin-bottom:5px'>{app.trackName}</h5>
-                    <p style='margin:0'><strong>Rating:</strong> {app.averageUserRating} ⭐</p>
-                    <p style='margin:0'><strong>Reviews:</strong> {app.userRatingCount}</p>
-                    <p style='margin:0'><strong>Price:</strong> {app.formattedPrice}</p>
-                    <p style='margin:0'><strong>Advisory:</strong> {app.contentAdvisoryRating}</p>
-                    <a href="{app.trackViewUrl}" target="_blank">🔗 View</a>
+                <div style='border:1px solid #ccc; padding:10px; border-radius:6px; background-color:#ffffff;'>
+                    <h5 style='margin-bottom:6px;'>{app.trackName}</h5>
+                    <p style='margin:0; font-size:14px;'><strong>Rating:</strong> {app.averageUserRating} / 5</p>
+                    <p style='margin:0; font-size:14px;'><strong>Reviews:</strong> {app.userRatingCount}</p>
+                    <p style='margin:0; font-size:14px;'><strong>Price:</strong> {app.formattedPrice}</p>
+                    <p style='margin:0; font-size:14px;'><strong>Advisory:</strong> {app.contentAdvisoryRating}</p>
+                    <p style='margin-top:6px;'><a href="{app.trackViewUrl}" target="_blank">View on App Store</a></p>
                 </div>
                 """, unsafe_allow_html=True)
 
