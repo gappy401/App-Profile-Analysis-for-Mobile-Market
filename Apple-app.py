@@ -136,6 +136,7 @@ with tab3:
     """)
 
     # 📊 Rating Distribution in Genre
+    genre_peers = overview_df[overview_df['primaryGenreName'] == genre]
     st.markdown("#### 📊 Rating Distribution in Genre")
     col1, col2 = st.columns([2, 1])
     with col1:
