@@ -136,29 +136,32 @@ with tab3:
     """)
 
     # 📊 Rating Distribution in Genre
-    genre_peers = overview_df[overview_df['primaryGenreName'] == genre]
-    fig1, ax1 = plt.subplots()
-    sns.histplot(genre_peers['averageUserRating'], bins=20, kde=True, ax=ax1)
-    ax1.axvline(app_data['averageUserRating'], color='red', linestyle='--', label='Selected App')
-    ax1.set_title(f"Rating Distribution in {genre}")
-    ax1.legend()
-    st.pyplot(fig1)
+    st.markdown("#### 📊 Rating Distribution in Genre")
+    col1, col2 = st.columns([2, 1])
+    with col1:
+        fig1, ax1 = plt.subplots(figsize=(6, 3))
+        sns.histplot(genre_peers['averageUserRating'], bins=20, kde=True, ax=ax1)
+        ax1.axvline(app_data['averageUserRating'], color='red', linestyle='--', label='Selected App')
+        ax1.set_title(f"Ratings in {genre}")
+        ax1.legend()
+        st.pyplot(fig1)
 
-    # 💸 Price vs. Rating using top_df
-    genre_monetization = top_df.merge(overview_df[['trackName', 'primaryGenreName']], on='trackName', how='left')
-    genre_monetization = genre_monetization[genre_monetization['primaryGenreName'] == genre]
+    with col2:
+        st.metric("Selected App Rating", f"{app_data['averageUserRating']} ⭐")
 
-    fig2, ax2 = plt.subplots()
+    # 💸 Price vs. Rating
+    st.markdown("#### 💸 Price vs. Rating in Genre")
+    fig2, ax2 = plt.subplots(figsize=(6, 3))
     sns.boxplot(data=genre_monetization, x='formattedPrice', y='averageUserRating', ax=ax2)
     ax2.set_title(f"Price vs. Rating in {genre}")
     st.pyplot(fig2)
 
     # 🔥 Review Volume vs. Rating
-    fig3, ax3 = plt.subplots()
+    st.markdown("#### 🔥 Review Volume vs. Rating")
+    fig3, ax3 = plt.subplots(figsize=(6, 3))
     sns.scatterplot(data=genre_monetization, x='userRatingCount', y='averageUserRating', ax=ax3)
     ax3.axhline(app_data['averageUserRating'], color='red', linestyle='--')
     ax3.axvline(app_data['userRatingCount'], color='red', linestyle='--')
     ax3.set_title("Review Volume vs. Rating")
     st.pyplot(fig3)
-    
     
