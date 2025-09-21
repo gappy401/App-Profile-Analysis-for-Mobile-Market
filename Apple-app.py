@@ -193,7 +193,6 @@ def render_explorer_tab():
     # Second Row: Advisory + Comparative Metrics
     col_advisory, col_percentile, col_zscore = st.columns([1, 1, 1])
     col_advisory.metric(label="Advisory", value=app_data['contentAdvisoryRating'])
-    col_percentile.metric(label="Rating Percentile", value=f"{rating_percentile}%")
     col_zscore.metric(label="Review Z-Score", value=f"{z_score_reviews:.2f}")
 
     # ------------------ Charts ------------------
