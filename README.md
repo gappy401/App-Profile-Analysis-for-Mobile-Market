@@ -1,4 +1,4 @@
-# Profitable App Profiles for Mobile Market
+# App Store App Analysis
 
 This project presents a modular analytics dashboard designed to evaluate mobile app performance across the App Store. Built with Streamlit, the dashboard enables strategic insights into user engagement, monetization, and genre-specific benchmarks. It is intended for product teams, data analysts, and decision-makers seeking to understand the characteristics of high-performing mobile applications.
 
