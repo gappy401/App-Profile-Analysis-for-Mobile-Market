@@ -24,10 +24,9 @@ Key visual modules:
   - Review volume z-score  
   - Price vs. rating scatterplot  
   - Rating histogram  
-  - Update timeline (if available)  
   - NLP keyword extraction
-  - 
-<img src="Images/img-3.jpeg" alt="Explorer" width="400" height="300"/>
+  
+<img src="Images/img-3.jpeg" alt="Explorer" width="300" height="300"/>
 
 ### Top Apps Module  
 - 4×3 grid of top apps  
