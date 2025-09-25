@@ -1,13 +1,12 @@
-# 📱 App Store App Analysis
+# App Store App Analysis
 
 A modular Streamlit dashboard for analyzing mobile app performance across the App Store. Designed for product teams and data analysts, it delivers strategic insights into user engagement, monetization, and genre-level benchmarks.
 
 ---
 
-## 🔍 Dashboard Preview
+## Dashboard Preview
 
-<!-- Insert your dashboard screenshot below -->
-<!-- !-->
+
 
 Key visual modules:
 - **Explorer**: Filter apps by rating, price, genre, and title. View rating percentile, z-score, price vs. rating plots, and keyword extraction.
@@ -38,11 +37,12 @@ Key visual modules:
 ### Overview Module  
 - Genre-level popularity & rating trends  
 - Advisory category distribution  
-- Contextual insights on “Not Yet Rated” apps  
-
+- Contextual insights on “Not Yet Rated” apps
+- 
+<img src="Images/img-1.jpeg" alt="Explorer" width="400"/>
 ---
 
-## 📊 Data Sources
+## Data Sources
 
 - `overview.parquet`: genre, advisory, rating metadata  
 - `top_apps.parquet`: monetization & engagement metrics  
@@ -50,7 +50,7 @@ Key visual modules:
 
 ---
 
-## 💡 Value Proposition
+## Value Proposition
 
 - Identify standout apps by genre  
 - Correlate pricing models with user satisfaction  
@@ -59,7 +59,7 @@ Key visual modules:
 
 ---
 
-## 🧠 Tech Stack
+## Tech Stack
 
 - **Streamlit**: dashboard framework  
 - **Pandas**: data manipulation  
