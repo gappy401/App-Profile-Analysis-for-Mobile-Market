@@ -28,7 +28,7 @@ Key visual modules:
   - Update timeline (if available)  
   - NLP keyword extraction  
 
- [Explorer](Images/img-3.jpegimage.png) 
+ [Explorer](Images/img-3.jpeg) 
 
 ### Top Apps Module  
 - 4×3 grid of top apps  
