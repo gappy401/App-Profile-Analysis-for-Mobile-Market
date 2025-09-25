@@ -26,9 +26,9 @@ Key visual modules:
   - Price vs. rating scatterplot  
   - Rating histogram  
   - Update timeline (if available)  
-  - NLP keyword extraction  
-
-![Explorer](Images/img-3.jpeg) 
+  - NLP keyword extraction
+  - 
+<img src="Images/img-3.jpeg" alt="Explorer" width="400"/>
 
 ### Top Apps Module  
 - 4×3 grid of top apps  
