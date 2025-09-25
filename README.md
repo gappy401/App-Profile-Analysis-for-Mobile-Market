@@ -1,53 +1,67 @@
-# App Store App Analysis
+# 📱 App Store App Analysis
 
-This project presents a modular analytics dashboard designed to evaluate mobile app performance across the App Store. Built with Streamlit, the dashboard enables strategic insights into user engagement, monetization, and genre-specific benchmarks. It is intended for product teams, data analysts, and decision-makers seeking to understand the characteristics of high-performing mobile applications.
+A modular Streamlit dashboard for analyzing mobile app performance across the App Store. Designed for product teams and data analysts, it delivers strategic insights into user engagement, monetization, and genre-level benchmarks.
 
-## Overview
+---
 
-The dashboard provides a multi-dimensional view of app performance, combining user ratings, review volume, pricing models, and genre context. It supports exploratory analysis, competitive benchmarking, and product positioning.
+## 🔍 Dashboard Preview
 
-## Key Features
+<!-- Insert your dashboard screenshot below -->
+<!-- !-->
 
-### Explorer Module
-- Filter apps by rating threshold, pricing model, and title keyword
-- Select any app to view:
-  - Rating percentile within its genre
-  - Review volume z-score
-  - Price vs. rating distribution
-  - Rating distribution histogram
-  - Update timeline (if available)
-  - Top keywords extracted from app description
+Key visual modules:
+- **Explorer**: Filter apps by rating, price, genre, and title. View rating percentile, z-score, price vs. rating plots, and keyword extraction.
+- **Top Apps**: Grid of high-rated, high-engagement apps with KPI cards and scatterplots.
+- **Overview**: Genre popularity, rating distributions, and advisory category breakdowns.
 
-### Top Apps Module
-- View high-rated, high-engagement apps in a compact 4×3 grid layout
-- KPI cards highlighting the highest-rated and most-reviewed apps
-- Scatterplot visualizing price vs. user rating
+---
 
-### Overview Module
-- Genre-level popularity and rating trends
-- Distribution of ratings by advisory category
-- Contextual note: “Not Yet Rated” apps often reflect limited visibility or pending Apple review status
+## ⚙️ Features
 
-## Data Sources
+### Explorer Module  
+- Dynamic filters: rating threshold, price type, genre, title keyword  
+- App drilldowns:  
+  - Rating percentile (genre-relative)  
+  - Review volume z-score  
+  - Price vs. rating scatterplot  
+  - Rating histogram  
+  - Update timeline (if available)  
+  - NLP keyword extraction  
 
-The dashboard utilizes three modular Parquet files:
-- `overview.parquet`: genre, advisory, and rating metadata
-- `top_apps.parquet`: monetization and engagement metrics
-- `explorer.parquet`: filtered subset for drilldowns
+ [Explorer](\Images\img-3.jpegimage.png) 
 
-## Value Proposition
+### Top Apps Module  
+- 4×3 grid of top apps  
+- KPI cards: highest-rated & most-reviewed  
+- Price vs. rating scatterplot  
 
-This tool enables teams to:
-- Identify standout apps within specific genres
-- Understand how pricing strategies correlate with user satisfaction
-- Benchmark performance using normalized metrics
-- Explore update cadence and keyword positioning
+### Overview Module  
+- Genre-level popularity & rating trends  
+- Advisory category distribution  
+- Contextual insights on “Not Yet Rated” apps  
 
-## Technology Stack
+---
 
-- Streamlit for interactive dashboard development
-- Pandas for data manipulation
-- Altair and Seaborn for statistical visualizations
-- Scikit-learn for keyword extraction via NLP
+## 📊 Data Sources
 
+- `overview.parquet`: genre, advisory, rating metadata  
+- `top_apps.parquet`: monetization & engagement metrics  
+- `explorer.parquet`: filtered subset for drilldowns  
 
+---
+
+## 💡 Value Proposition
+
+- Identify standout apps by genre  
+- Correlate pricing models with user satisfaction  
+- Benchmark with normalized metrics  
+- Explore update cadence & keyword positioning  
+
+---
+
+## 🧠 Tech Stack
+
+- **Streamlit**: dashboard framework  
+- **Pandas**: data manipulation  
+- **Altair & Seaborn**: visualizations  
+- **Scikit-learn**: NLP keyword extraction  
