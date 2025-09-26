@@ -24,14 +24,14 @@ A modular Streamlit dashboard for analyzing mobile app performance across the Ap
   - Rating histogram  
   - NLP keyword extraction
   
-<img src="Images/img-3.jpeg" alt="Explorer" width="400" height="300"/>
+<img src="Images/img-3.jpeg" alt="Explorer" width="400" />
 
 ### Top Apps Module  
 - 4×3 grid of top apps  
 - KPI cards: highest-rated & most-reviewed  
 - Price vs. rating scatterplot
 
-  <img src="Images/img-2.jpeg" alt="Explorer" width="400" height="300"/>
+  <img src="Images/img-2.jpeg" alt="Explorer" width="400" />
 
 ### Overview Module  
 - Genre-level popularity & rating trends  
