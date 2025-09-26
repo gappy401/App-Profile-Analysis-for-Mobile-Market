@@ -4,17 +4,6 @@ A modular Streamlit dashboard for analyzing mobile app performance across the Ap
 
 ---
 
-## Dashboard Preview
-
-
-
-Key visual modules:
-- **Explorer**: Filter apps by rating, price, genre, and title. View rating percentile, z-score, price vs. rating plots, and keyword extraction.
-- **Top Apps**: Grid of high-rated, high-engagement apps with KPI cards and scatterplots.
-- **Overview**: Genre popularity, rating distributions, and advisory category breakdowns.
-
----
-
 ## ⚙️ Features
 
 ### Explorer Module  
@@ -31,13 +20,15 @@ Key visual modules:
 ### Top Apps Module  
 - 4×3 grid of top apps  
 - KPI cards: highest-rated & most-reviewed  
-- Price vs. rating scatterplot  
+- Price vs. rating scatterplot
+
+  <img src="Images/img-2.jpeg" alt="Explorer" width="300" height="300"/>
 
 ### Overview Module  
 - Genre-level popularity & rating trends  
 - Advisory category distribution  
 - Contextual insights on “Not Yet Rated” apps
-- 
+
 <img src="Images/img-1.jpeg" alt="Explorer" width="400"/>
 ---
 
