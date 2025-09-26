@@ -4,6 +4,15 @@ A modular Streamlit dashboard for analyzing mobile app performance across the Ap
 
 ---
 
+## Value Proposition
+
+- Identify standout apps by genre  
+- Correlate pricing models with user satisfaction  
+- Benchmark with normalized metrics  
+- Explore update cadence & keyword positioning
+
+---
+
 ## ⚙️ Features
 
 ### Explorer Module  
@@ -15,21 +24,21 @@ A modular Streamlit dashboard for analyzing mobile app performance across the Ap
   - Rating histogram  
   - NLP keyword extraction
   
-<img src="Images/img-3.jpeg" alt="Explorer" width="300" height="300"/>
+<img src="Images/img-3.jpeg" alt="Explorer" width="400" height="300"/>
 
 ### Top Apps Module  
 - 4×3 grid of top apps  
 - KPI cards: highest-rated & most-reviewed  
 - Price vs. rating scatterplot
 
-  <img src="Images/img-2.jpeg" alt="Explorer" width="300" height="300"/>
+  <img src="Images/img-2.jpeg" alt="Explorer" width="400" height="300"/>
 
 ### Overview Module  
 - Genre-level popularity & rating trends  
 - Advisory category distribution  
 - Contextual insights on “Not Yet Rated” apps
 
-<img src="Images/img-1.jpeg" alt="Explorer" width="400"/>
+  <img src="Images/img-1.jpeg" alt="Explorer" width="400"/>
 ---
 
 ## Data Sources
@@ -38,14 +47,7 @@ A modular Streamlit dashboard for analyzing mobile app performance across the Ap
 - `top_apps.parquet`: monetization & engagement metrics  
 - `explorer.parquet`: filtered subset for drilldowns  
 
----
 
-## Value Proposition
-
-- Identify standout apps by genre  
-- Correlate pricing models with user satisfaction  
-- Benchmark with normalized metrics  
-- Explore update cadence & keyword positioning  
 
 ---
 
